@@ -35,7 +35,7 @@ save_district_plot_mod = 100
 os.makedirs(outdir, exist_ok=True)
 nc_graph = Graph.from_file("./NC/NC.geojson")
 
-# Set up the initial partition as "CD"
+# Set up the initial partition as "CD22"
 my_updaters = {'cut_edges': cut_edges, 'population': Tally('TOTPOP', alias='population'),
                'latino population': Tally('HISP', alias='latino population')}
 
@@ -47,7 +47,7 @@ elections = [
 election_updaters = {election.name: election for election in elections}
 my_updaters.update(election_updaters)
 
-initial_partition = GeographicPartition(nc_graph, assignment="CD", updaters=my_updaters)
+initial_partition = GeographicPartition(nc_graph, assignment="CD22", updaters=my_updaters)
 
 num_dist = len(initial_partition)
 
