@@ -26,10 +26,10 @@ import pandas as pd
 
 start_time = time.time()
 random.seed(12345678)
-outdir = "./NC_recom_CD/"
+outdir = "./NC23_recom_CD/"
 
 # Need to adjust the total steps
-total_steps_in_run = 5000
+total_steps_in_run = 50000
 save_district_graph_mod = 1
 save_district_plot_mod = 100
 
@@ -110,6 +110,17 @@ chain_22 = MarkovChain(
     total_steps=total_steps_in_run
 )
 
+chain_23 = MarkovChain(
+    proposal=proposal,
+    constraints=[
+        pop_constraint,
+        compactness_bound
+    ],
+    accept=always_accept,
+    initial_state=initial_partition_23,
+    total_steps=total_steps_in_run
+)
+
 # Initiate lists to store the counts
 efficiency_gap_ensemble = []
 mean_median_diff_ensemble = []
@@ -122,14 +133,15 @@ population_ensemble = {
     "asian population": [],
     "NHPI population": [],  # Native Hawaiian or Pacific Islander
     "AMIN population": [],  # American Indian
-    "other population": []
+    "other population": [],
+    "non-white population": []
 }
 democratic_won_ensemble = []
 election_name = "G20PRE"
 
 # Run through chain, building plots
-for t, part in enumerate(chain_22):
-    if t % 50 == 0:
+for t, part in enumerate(chain_23):
+    if t % 100 == 0:
         print("... step", t, "...")
 
     efficiency_gap_ensemble.append(part[election_name].efficiency_gap())
@@ -146,7 +158,7 @@ for t, part in enumerate(chain_22):
         "asian population": 0,
         "NHPI population": 0,  # Native Hawaiian or Pacific Islander
         "AMIN population": 0,  # American Indian
-        "other population": 0
+        "other population": 0,
     }
 
     for i in range(1, num_dist + 1):
@@ -156,8 +168,11 @@ for t, part in enumerate(chain_22):
             if part[pop_type][i]/total_population >= 0.5:
                 num_majorities[pop_type] += 1
 
-    for pop_type in num_majorities.keys():
-        population_ensemble[pop_type].append(num_majorities[pop_type])
+    for pop_type in population_ensemble.keys():
+        if pop_type == "non-white population":
+            population_ensemble[pop_type].append(num_dist - num_majorities["white population"])
+        else:
+            population_ensemble[pop_type].append(num_majorities[pop_type])
 
     # Analyze partition results
     num_dem_wins = 0
