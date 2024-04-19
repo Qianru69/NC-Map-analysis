@@ -18,14 +18,14 @@ import json
 parser = argparse.ArgumentParser(description="UB Chain run", 
                                  prog="ub_runs.py")
 parser.add_argument("states", metavar="states id", type=str,
-                    choices=["VA", "TX", "AR", "CO", "LA", "NM"],
+                    choices=["NC"],
                     help="which states to run chains on")
 parser.add_argument("iters", metavar="Length of runs", type=int,
                     help="how long to run each chain")
 args = parser.parse_args()
 
 
-num_h_districts = {"VA": 100, "TX": 150, "AR": 100, "CO": 65, "LA": 105, "NM": 70}
+num_h_districts = {"NC": 14}
 
 
 NUM_DISTRICTS = num_h_districts[args.states]
@@ -39,8 +39,8 @@ EPS = 0.045
 
 print("Reading in Data/Graph")
 
-graph = Graph.from_json("./state_experiments/state_block_group_graphs/BG_{}.json".format(args.states))
-
+#graph = Graph.from_json("./state_experiments/state_block_group_graphs/BG_{}.json".format(args.states))
+nc_graph = Graph.from_file("../NC/NC.geojson")
 
 my_updaters = {"population" : Tally(POP_COL, alias="population"),
                "VAP": Tally("VAP"),
@@ -53,17 +53,17 @@ my_updaters = {"population" : Tally(POP_COL, alias="population"),
 
 print("Creating seed plan", flush=True)
 
-total_pop = sum([graph.nodes()[n][POP_COL] for n in graph.nodes()])
+total_pop = sum([nc_graph.nodes()[n][POP_COL] for n in nc_graph.nodes()])
 ideal_pop = total_pop / NUM_DISTRICTS
 
-seed_bal = {"AR": "05", "CO": "02", "LA": "04", "NM": "04", "TX": "02", "VA": "02"}
+#seed_bal = {"AR": "05", "CO": "02", "LA": "04", "NM": "04", "TX": "02", "VA": "02"}
 
-with open("./state_experiments/seeds/{}_house_seed_{}.json".format(args.states, seed_bal[args.states]), "r") as f:
-    cddict = json.load(f)
+#with open("./state_experiments/seeds/{}_house_seed_{}.json".format(args.states, seed_bal[args.states]), "r") as f:
+#    cddict = json.load(f)
 
-cddict = {int(k):v for k,v in cddict.items()}
+#cddict = {int(k):v for k,v in cddict.items()}
 
-init_partition = Partition(graph, assignment=cddict, updaters=my_updaters)
+init_partition = Partition(nc_graph, assignment="CD22", updaters=my_updaters)
 
 
 ## Setup chain
@@ -95,7 +95,7 @@ for n in range(N_SAMPS):
                      "HVAP": np.zeros((ITERS, NUM_DISTRICTS)),
                      "WVAP": np.zeros((ITERS, NUM_DISTRICTS))}
 
-    output = "./state_experiments/data/states/{}_dists{}_{:.1%}_{}_unbiased_{}.p".format(args.states,
+    output = "./data/unbiased/{}_dists{}_{:.1%}_{}_unbiased_{}.p".format(args.states,
                                                         NUM_DISTRICTS, EPS, 
                                                         ITERS, n)
 

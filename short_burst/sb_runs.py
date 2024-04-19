@@ -96,12 +96,12 @@ for n in range(N_SAMPS):
 
     print("\tSaving results", flush=True)
 
-    f_out = "./state_experiments/data/states/{}_dists{}_{}opt_{:.1%}_{}_sbl{}_score{}_{}.npy".format(args.states,
+    f_out = "./data/states/{}_dists{}_{}opt_{:.1%}_{}_sbl{}_score{}_{}.npy".format(args.states,
                                                         NUM_DISTRICTS, MIN_POP_COL, EPS, 
                                                         ITERS, BURST_LEN, args.score, n)
     np.save(f_out, sb_obs[1])
 
-    f_out_part = "./state_experiments/data/states/{}_dists{}_{}opt_{:.1%}_{}_sbl{}_score{}_{}_max_part.p".format(args.states,
+    f_out_part = "./data/states/{}_dists{}_{}opt_{:.1%}_{}_sbl{}_score{}_{}_max_part.p".format(args.states,
                                                         NUM_DISTRICTS, MIN_POP_COL, EPS, 
                                                         ITERS, BURST_LEN, args.score, n)
 
