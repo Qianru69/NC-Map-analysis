@@ -12,7 +12,6 @@ from gerrychain import constraints
 from gerrychain.tree import recursive_tree_part
 from gingleator import Gingleator
 from little_helpers import *
-import json
 
 ## Read in 
 parser = argparse.ArgumentParser(description="SB Chain run", 
@@ -47,6 +46,7 @@ N_SAMPS = 10
 SCORE_FUNCT = None #score_functs[args.score]
 EPS = 0.045
 MIN_POP_COL = args.col
+THRESH = 0.5
 
 
 ## Setup graph, updaters, elections, and initial partition
@@ -54,7 +54,7 @@ MIN_POP_COL = args.col
 print("Reading in Data/Graph", flush=True)
 
 #graph = Graph.from_json("./state_experiments/state_block_group_graphs/BG_{}.json".format(args.states))
-nc_graph = Graph.from_file("../NC/NC.geojson")
+nc_graph = Graph.from_file("./NC/NC.geojson")
 
 my_updaters = {"population" : Tally(POP_COL, alias="population"),
                "VAP": Tally("VAP"),
@@ -69,17 +69,10 @@ print("Creating seed plan", flush=True)
 
 total_pop = sum([nc_graph.nodes()[n][POP_COL] for n in nc_graph.nodes()])
 
-#seed_bal = {"NC": "05", "CO": "02", "LA": "04", "NM": "04", "TX": "02", "VA": "02"}
-
-#with open("./state_experiments/seeds/{}_house_seed_{}.json".format(args.states, seed_bal[args.states]), "r") as f:
-#    cddict = json.load(f)
-
-#cddict = {int(k):v for k,v in cddict.items()}
-
 init_partition = Partition(nc_graph, assignment="CD22", updaters=my_updaters)
 
 gingles = Gingleator(init_partition, pop_col=POP_COL,
-                     threshold=0.5, score_funct=SCORE_FUNCT, epsilon=EPS,
+                     threshold=THRESH, score_funct=SCORE_FUNCT, epsilon=EPS,
                      minority_perc_col="{}_perc".format(MIN_POP_COL))
 
 gingles.init_minority_perc_col(MIN_POP_COL, "VAP", 
@@ -96,14 +89,14 @@ for n in range(N_SAMPS):
 
     print("\tSaving results", flush=True)
 
-    f_out = "./data/states/{}_dists{}_{}opt_{:.1%}_{}_sbl{}_score{}_{}.npy".format(args.states,
+    f_out = "./short_burst/data/states/{}_dists{}_{}opt_{:.1%}_{}_sbl{}_th{:.1%}_score{}_{}.npy".format(args.states,
                                                         NUM_DISTRICTS, MIN_POP_COL, EPS, 
-                                                        ITERS, BURST_LEN, args.score, n)
+                                                        ITERS, BURST_LEN, THRESH, args.score, n)
     np.save(f_out, sb_obs[1])
 
-    f_out_part = "./data/states/{}_dists{}_{}opt_{:.1%}_{}_sbl{}_score{}_{}_max_part.p".format(args.states,
+    f_out_part = "./short_burst/data/states/{}_dists{}_{}opt_{:.1%}_{}_sbl{}_th{:.1%}_score{}_{}_max_part.p".format(args.states,
                                                         NUM_DISTRICTS, MIN_POP_COL, EPS, 
-                                                        ITERS, BURST_LEN, args.score, n)
+                                                        ITERS, BURST_LEN, THRESH, args.score, n)
 
     max_stats = {"VAP": sb_obs[0][0]["VAP"],
                  "BVAP": sb_obs[0][0]["BVAP"],
