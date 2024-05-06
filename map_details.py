@@ -71,6 +71,14 @@ for map in initial_partitions:
     print("Partisan Bias:", part[election_name].mean_median())
     print("Cut Edges:", len(part['cut_edges']))
     print("Democratic winning districts:", part[election_name].wins("Democratic"))
+
+    # Calculate Democratic vote share
+    election_results = part[election_name]
+    party1 = election_results.counts(election_results.election.parties[0])
+    party2 = election_results.counts(election_results.election.parties[1])
+    total_votes = sum(party1) + sum(party2)
+    print("Democratic Vote Share State Wide:", sum(party1) / total_votes)
+
     num_majorities = {
         "latino population": 0,
         "black population": 0,
