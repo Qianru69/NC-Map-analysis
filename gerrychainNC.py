@@ -67,7 +67,7 @@ elections = [
     Election("G20PRE", {"Democratic": "G20PRED", "Republican": "G20PRER"}),
     Election("G20USS", {"Democratic": "G20USSD", "Republican": "G20USSR"}),
     Election("G20ATG", {"Democratic": "G20ATGD", "Republican": "G20ATGR"}),
-    Election("G20AUD", {"Democratic": "G20AUGD", "Republican": "G20AUDR"}),
+    Election("G20AUD", {"Democratic": "G20AUDD", "Republican": "G20AUDR"}),
     Election("G20GOV", {"Democratic": "G20GOVD", "Republican": "G20GOVR"}),
     Election("G20LTG", {"Democratic": "G20LTGD", "Republican": "G20LTGR"}),
     Election("G20SOS", {"Democratic": "G20SOSD", "Republican": "G20SOSR"}),
@@ -126,16 +126,6 @@ efficiency_gap_ensemble = []
 mean_median_diff_ensemble = []
 partisan_bias_ensemble = []
 cutedge_ensemble = []
-population_ensemble = {
-    "latino population": [],
-    "black population": [],
-    "white population": [],
-    "asian population": [],
-    "NHPI population": [],  # Native Hawaiian or Pacific Islander
-    "AMIN population": [],  # American Indian
-    "other population": [],
-    "non-white population": []
-}
 democratic_won_ensemble = []
 election_name = "G20PRE"
 
@@ -150,30 +140,6 @@ for t, part in enumerate(chain_23):
     cut_edges_count = len(part['cut_edges'])
     cutedge_ensemble.append(cut_edges_count)
 
-    # Calculate number of latino-majority districts
-    num_majorities = {
-        "latino population": 0,
-        "black population": 0,
-        "white population": 0,
-        "asian population": 0,
-        "NHPI population": 0,  # Native Hawaiian or Pacific Islander
-        "AMIN population": 0,  # American Indian
-        "other population": 0,
-    }
-
-    for i in range(1, num_dist + 1):
-        total_population = part['population'][i]
-
-        for pop_type in num_majorities.keys():
-            if part[pop_type][i]/total_population >= 0.5:
-                num_majorities[pop_type] += 1
-
-    for pop_type in population_ensemble.keys():
-        if pop_type == "non-white population":
-            population_ensemble[pop_type].append(num_dist - num_majorities["white population"])
-        else:
-            population_ensemble[pop_type].append(num_majorities[pop_type])
-
     # Analyze partition results
     num_dem_wins = 0
     num_dem_wins = part[election_name].wins("Democratic")
@@ -183,10 +149,9 @@ print(efficiency_gap_ensemble)
 print(mean_median_diff_ensemble)
 print(partisan_bias_ensemble)
 print(cutedge_ensemble)
-print(population_ensemble)
 print(democratic_won_ensemble)
 
-# 1. The number of cut edges in the plan
+# The number of cut edges in the plan
 plt.figure()
 plt.title('NC recom cut edges plot')
 plt.xlabel('Cutting Edges')
@@ -196,6 +161,7 @@ cutedge_output_file = outdir + "cut_edges_plot(" + election_name + ")" + str(tot
 plt.savefig(cutedge_output_file)
 plt.close()
 
+# The number of cut edges in the plan
 plt.figure()
 plt.title('NC recom efficiency gap plot')
 plt.xlabel('Efficiency Gap')
@@ -223,25 +189,7 @@ partisan_bias_output_file = outdir + "partisan_bias_difference_plot(" + election
 plt.savefig(partisan_bias_output_file)
 plt.close()
 
-# 2. The number of certain race majority districts in the plan
-for pop_type in population_ensemble.keys():
-    plt.figure()
-    plt.title('NC recom ' + pop_type + ' majority plot')
-    # bins = range(3)
-    # plt.hist(latinmaj_ensemble, bins=bins, align = 'left')
-    plt.xlabel('Number of ' + pop_type + ' Majority Districts')  # Add x-axis label
-    plt.ylabel('Counts')  # Add y-axis label
-    ensemble = population_ensemble[pop_type]
-    plt.hist(ensemble, bins=np.arange(min(ensemble) - 0.5, max(ensemble) + 1.5, 1), align='mid')
-    plt.xticks(np.arange(min(ensemble), max(ensemble) + 1, 1))
-    output_file = outdir + pop_type + "_majority_plot_" + election_name + "_" + str(total_steps_in_run) + ".png"
-    plt.savefig(output_file)
-    plt.close()
-
-# 3. The number of Democratic-won districts in the plan
-# (you’ll need to add some “updaters” in order to do this.
-# You may want to see https://gerrychain. readthedocs.io/en/latest/api.html?
-# highlight=updaters#module-gerrychain. updaters).
+# The number of Democratic-won districts in the plan
 plt.figure()
 plt.title('NC recom democratic win plot')
 plt.xlabel('Number of Democratic Wins')
